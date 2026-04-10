@@ -154,13 +154,18 @@ export const useStore = create(
       // ── HYDRATE (background Supabase sync) ──
 
       hydrate: async () => {
-        const [cardsRes, routinesRes, stepsRes, presetsRes, presetCardsRes] = await Promise.all([
-          supabase.from('cards').select('*').order('sort_order'),
-          supabase.from('routines').select('*').order('sort_order'),
-          supabase.from('routine_steps').select('*').order('sort_order'),
-          supabase.from('presets').select('*').order('sort_order'),
-          supabase.from('preset_cards').select('*').order('sort_order'),
-        ])
+        let cardsRes, routinesRes, stepsRes, presetsRes, presetCardsRes
+        try {
+          ;[cardsRes, routinesRes, stepsRes, presetsRes, presetCardsRes] = await Promise.all([
+            supabase.from('cards').select('*').order('sort_order'),
+            supabase.from('routines').select('*').order('sort_order'),
+            supabase.from('routine_steps').select('*').order('sort_order'),
+            supabase.from('presets').select('*').order('sort_order'),
+            supabase.from('preset_cards').select('*').order('sort_order'),
+          ])
+        } catch {
+          return // offline or network error — keep defaults
+        }
 
         const updates = {}
         if (cardsRes.data?.length)    updates.cards = cardsRes.data
