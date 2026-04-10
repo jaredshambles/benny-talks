@@ -23,6 +23,9 @@ export const useStore = create(
       speaking: null,
       settingsOpen: false,
       presetSwitcherOpen: false,
+      timerPickerOpen: false,
+      timerDoneVisible: false,
+      transitionOverlayVisible: false,
 
       // ── ROUTINE ──
       routineActive: null,
@@ -43,6 +46,7 @@ export const useStore = create(
         voiceRate: 0.80,
         voicePitch: 1.10,
         transitionChimeEnabled: true,
+        webhookUrl: '',
       },
 
       // ── ACTIONS ──
@@ -79,6 +83,18 @@ export const useStore = create(
       openSettings: () => set({ settingsOpen: true }),
       closeSettings: () => set({ settingsOpen: false }),
 
+      openTimerPicker: () => set({ timerPickerOpen: true }),
+      closeTimerPicker: () => set({ timerPickerOpen: false }),
+
+      showTimerDone: () => set({ timerDoneVisible: true }),
+      dismissTimerDone: () => set({ timerDoneVisible: false }),
+
+      showTransitionOverlay: () => set({ transitionOverlayVisible: true }),
+      dismissTransitionOverlay: () => set({ transitionOverlayVisible: false }),
+
+      updatePresetCards: (presetId, cardIds) =>
+        set(s => ({ presetCards: { ...s.presetCards, [presetId]: cardIds } })),
+
       updateSettings: (partial) => set(s => ({ settings: { ...s.settings, ...partial } })),
 
       addCard: async (cardData) => {
@@ -106,6 +122,7 @@ export const useStore = create(
             clearInterval(timer.intervalId)
             playTimerChime()
             set({ timer: { running: false, paused: false, totalSecs: 0, remainingSecs: 0, label: null, intervalId: null } })
+            get().showTimerDone()
             return
           }
           set(s => ({ timer: { ...s.timer, remainingSecs: s.timer.remainingSecs - 1 } }))
