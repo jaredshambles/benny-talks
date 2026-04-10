@@ -13,6 +13,7 @@ import PresetSwitcher from './components/presets/PresetSwitcher'
 import SettingsModal from './components/settings/SettingsModal'
 import TimerPicker from './components/overlay/TimerPicker'
 import TimerDoneOverlay from './components/overlay/TimerDoneOverlay'
+import TransitionOverlay from './components/overlay/TransitionOverlay'
 
 export default function App() {
   const { activeTab, routineActive, settingsOpen, presetSwitcherOpen, hydrate } = useStore()
@@ -39,6 +40,7 @@ export default function App() {
 
       <TimerPicker />
       <TimerDoneOverlay />
+      <TransitionOverlay />
       <AnimatePresence>
         {routineActive && <RoutineFlow key="routine-flow" />}
       </AnimatePresence>
