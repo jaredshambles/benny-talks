@@ -8,7 +8,7 @@ export default {
     'bg-ppl',  'bg-ppl-l',  'bg-ppl-m',  'text-ppl',  'border-ppl',  'border-ppl-m',
     'bg-rtn',  'bg-rtn-l',  'bg-rtn-m',  'text-rtn',  'border-rtn',  'border-rtn-m',
     'bg-cust', 'bg-cust-l', 'bg-cust-m', 'text-cust', 'border-cust', 'border-cust-m',
-    'text-txt-m', 'text-txt-l',
+    'text-txt', 'text-txt-m', 'text-txt-l',
   ],
   theme: {
     extend: {
