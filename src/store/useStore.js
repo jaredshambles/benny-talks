@@ -5,6 +5,8 @@ import { speak } from '../lib/speech'
 import { playTimerChime } from '../lib/sounds'
 import { DEFAULT_CARDS, DEFAULT_ROUTINES, DEFAULT_ROUTINE_STEPS, DEFAULT_PRESETS, DEFAULT_PRESET_CARDS } from '../lib/defaultData'
 
+let speakingTimer = null
+
 export const useStore = create(
   persist(
     (set, get) => ({
@@ -51,7 +53,8 @@ export const useStore = create(
         const { settings } = get()
         speak(card.label, { rate: settings.voiceRate, pitch: settings.voicePitch })
         set({ speaking: { label: card.label, emoji: card.emoji } })
-        setTimeout(() => set({ speaking: null }), 2800)
+        if (speakingTimer) clearTimeout(speakingTimer)
+        speakingTimer = setTimeout(() => set({ speaking: null }), 2800)
 
         // Fire-and-forget tap log
         supabase.from('tap_log').insert({

@@ -22,7 +22,7 @@ export default function CategoryView({ category }) {
       <div className="px-4 py-2 flex-shrink-0">
         <h2 className="font-display text-[17px] text-txt-m">{CATEGORY_LABELS[category]}</h2>
       </div>
-      <CardPager cards={visible} />
+      <CardPager key={`${category}-${activePresetId}`} cards={visible} />
     </div>
   )
 }

@@ -25,7 +25,7 @@ export default function HomeView() {
         </p>
       </div>
 
-      <CardPager cards={quickPicks} />
+      <CardPager key={activePresetId} cards={quickPicks} />
 
       {/* Category shortcut row */}
       <div className="px-3 pb-3 pt-1 flex gap-2 flex-shrink-0">

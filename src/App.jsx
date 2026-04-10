@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { useStore } from './store/useStore'
 import { seedIfEmpty } from './lib/seed'
 import Header from './components/layout/Header'
@@ -34,9 +35,15 @@ export default function App() {
       <SpeakingBar />
       <BottomNav />
 
-      {routineActive    && <RoutineFlow />}
-      {presetSwitcherOpen && <PresetSwitcher />}
-      {settingsOpen     && <SettingsModal />}
+      <AnimatePresence>
+        {routineActive && <RoutineFlow key="routine-flow" />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {presetSwitcherOpen && <PresetSwitcher key="preset-switcher" />}
+      </AnimatePresence>
+      <AnimatePresence>
+        {settingsOpen && <SettingsModal key="settings-modal" />}
+      </AnimatePresence>
     </div>
   )
 }

@@ -6,7 +6,7 @@ export default function RoutineStep({ step, stepIndex, totalSteps }) {
 
   useEffect(() => {
     if (step.timer_secs) startTimer(step.timer_secs, step.label)
-  }, [step.id])
+  }, [stepIndex])
 
   const pct = timer.totalSecs > 0 ? timer.remainingSecs / timer.totalSecs : 0
 
