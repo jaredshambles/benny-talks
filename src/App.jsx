@@ -11,6 +11,7 @@ import SpeakingBar from './components/overlay/SpeakingBar'
 import RoutineFlow from './components/routines/RoutineFlow'
 import PresetSwitcher from './components/presets/PresetSwitcher'
 import SettingsModal from './components/settings/SettingsModal'
+import TimerPicker from './components/overlay/TimerPicker'
 
 export default function App() {
   const { activeTab, routineActive, settingsOpen, presetSwitcherOpen, hydrate } = useStore()
@@ -35,6 +36,7 @@ export default function App() {
       <SpeakingBar />
       <BottomNav />
 
+      <TimerPicker />
       <AnimatePresence>
         {routineActive && <RoutineFlow key="routine-flow" />}
       </AnimatePresence>
