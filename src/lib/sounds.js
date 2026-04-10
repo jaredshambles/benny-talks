@@ -25,7 +25,7 @@ function playNote(freq, startTime, duration, gainVal = 0.3) {
 export function playTimerChime() {
   const ac = getCtx()
   const t = ac.currentTime
-  const notes = [261.63, 329.63, 392.00, 523.25] // C4 E4 G4 C5
+  const notes = [523.25, 659.25, 783.99, 1046.50] // C5 E5 G5 C6
   notes.forEach((freq, i) => playNote(freq, t + i * 0.18, 0.5))
 }
 

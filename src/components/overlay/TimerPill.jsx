@@ -11,7 +11,7 @@ export default function TimerPill() {
   if (!timer.running) return null
 
   const pct = timer.totalSecs > 0 ? timer.remainingSecs / timer.totalSecs : 0
-  const colorClass = pct > 0.5 ? 'border-food text-food'
+  const colorClass = pct > 0.4 ? 'border-transparent text-txt'
     : pct > 0.2 ? 'border-act text-act'
     : 'border-feel text-feel animate-pulse'
 
