@@ -18,6 +18,7 @@ export const useStore = create(
       routineSteps: DEFAULT_ROUTINE_STEPS,
 
       // ── UI ──
+      addCardError: null,
       activeTab: 'home',
       activePresetId: 'preset-home',
       speaking: null,
@@ -98,15 +99,25 @@ export const useStore = create(
       updateSettings: (partial) => set(s => ({ settings: { ...s.settings, ...partial } })),
 
       addCard: async (cardData) => {
+        const tempId = `custom-${Date.now()}`
         const card = {
+          id: tempId,
           ...cardData,
           is_custom: true,
           sort_order: get().cards.filter(c => c.category === cardData.category).length,
         }
+        // Optimistically add locally so the card is immediately usable offline
+        set(s => ({ cards: [...s.cards, card] }))
+
         const { data, error } = await supabase.from('cards').insert(card).select().single()
-        if (!error && data) {
-          set(s => ({ cards: [...s.cards, data] }))
+        if (error) {
+          // Sync failed — card stays local with temp ID; surface error for caregiver
+          set(s => ({ addCardError: 'Card saved locally but not synced. Check your connection.' }))
+          setTimeout(() => set({ addCardError: null }), 5000)
+          return
         }
+        // Replace temp entry with the server-confirmed row (stable ID, timestamps, etc.)
+        set(s => ({ cards: s.cards.map(c => c.id === tempId ? data : c) }))
       },
 
       // ── TIMER ──
@@ -188,8 +199,17 @@ export const useStore = create(
         }
 
         const updates = {}
-        if (cardsRes.data?.length)    updates.cards = cardsRes.data
+
+        if (cardsRes.data?.length) {
+          // Merge: start with in-memory cards (which include defaults + any local-only temp
+          // cards), then overlay with server rows by ID so no card is silently dropped.
+          const merged = new Map(get().cards.map(c => [c.id, c]))
+          cardsRes.data.forEach(c => merged.set(c.id, c))
+          updates.cards = Array.from(merged.values())
+        }
+
         if (routinesRes.data?.length) updates.routines = routinesRes.data
+
         if (stepsRes.data?.length) {
           const stepMap = {}
           stepsRes.data.forEach(s => {
@@ -198,7 +218,9 @@ export const useStore = create(
           })
           updates.routineSteps = stepMap
         }
+
         if (presetsRes.data?.length) updates.presets = presetsRes.data
+
         if (presetCardsRes.data?.length) {
           const pcMap = {}
           presetCardsRes.data.forEach(pc => {
