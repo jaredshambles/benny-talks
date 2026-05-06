@@ -101,16 +101,18 @@ export const useStore = create(
 
       addCard: async (cardData) => {
         const tempId = `custom-${Date.now()}`
-        const card = {
+        const localCard = {
           id: tempId,
           ...cardData,
           is_custom: true,
           sort_order: get().cards.filter(c => c.category === cardData.category).length,
         }
         // Optimistically add locally so the card is immediately usable offline
-        set(s => ({ cards: [...s.cards, card] }))
+        set(s => ({ cards: [...s.cards, localCard] }))
 
-        const { data, error } = await supabase.from('cards').insert(card).select().single()
+        // Don't include the temp id — let Supabase generate a clean UUID
+        const { id: _omit, ...insertData } = localCard
+        const { data, error } = await supabase.from('cards').insert(insertData).select().single()
         if (error) {
           // Sync failed — card stays local with temp ID; surface error for caregiver
           set(s => ({ addCardError: 'Card saved locally but not synced. Check your connection.' }))
