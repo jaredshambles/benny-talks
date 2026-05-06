@@ -88,7 +88,6 @@ export default function SettingsModal() {
           >
             <h2 className="font-display text-xl text-txt">{getTitle()}</h2>
             <button
-              onTouchStart={view !== 'main' ? () => setView('main') : handleClose}
               onClick={view !== 'main' ? () => setView('main') : handleClose}
               className="w-9 h-9 rounded-btn bg-bg2 flex items-center justify-center text-txt-m font-body font-bold"
             >
@@ -187,14 +186,14 @@ function MainView({ settings, updateSettings, presets, stats, webhookUrl, setWeb
       {/* DATA */}
       <SectionLabel>Data</SectionLabel>
       <button
-        onTouchStart={onExportCSV} onClick={onExportCSV}
+        onClick={onExportCSV}
         className="bg-card rounded-btn p-4 flex items-center gap-3 w-full text-left active:bg-bg2 transition-colors"
       >
         <span className="text-xl">📤</span>
         <span className="font-body font-bold text-sm text-txt flex-1">Export as CSV</span>
       </button>
       <button
-        onTouchStart={onClearData} onClick={onClearData}
+        onClick={onClearData}
         className={`rounded-btn p-4 flex items-center gap-3 w-full text-left transition-colors ${confirmClear ? 'bg-feel' : 'bg-card active:bg-bg2'}`}
       >
         <span className="text-xl">🗑️</span>
@@ -333,7 +332,6 @@ function BrowseCardsView() {
                 <div key={card.id}>
                   {/* Card row — always visible */}
                   <button
-                    onTouchStart={() => expandedId === card.id ? closeEdit() : openEdit(card)}
                     onClick={() => expandedId === card.id ? closeEdit() : openEdit(card)}
                     className={`w-full bg-card rounded-btn px-4 py-3 flex items-center gap-3 text-left transition-colors
                       ${expandedId === card.id ? 'bg-act-l rounded-b-none' : 'active:bg-bg2'}`}
@@ -361,7 +359,6 @@ function BrowseCardsView() {
                         {editImgPreview ? (
                           <div className="flex items-center gap-3">
                             <button
-                              onTouchStart={() => fileRef.current?.click()}
                               onClick={() => fileRef.current?.click()}
                               className="relative flex-shrink-0"
                             >
@@ -376,14 +373,12 @@ function BrowseCardsView() {
                             </button>
                             <div className="flex flex-col gap-1.5">
                               <button
-                                onTouchStart={() => fileRef.current?.click()}
                                 onClick={() => fileRef.current?.click()}
                                 className="text-sm font-body font-bold text-act"
                               >
                                 📷 Replace photo
                               </button>
                               <button
-                                onTouchStart={() => { setEditImgPreview(null); setEditImgFile(null) }}
                                 onClick={() => { setEditImgPreview(null); setEditImgFile(null) }}
                                 className="text-sm font-body text-txt-l"
                               >
@@ -393,7 +388,6 @@ function BrowseCardsView() {
                           </div>
                         ) : (
                           <button
-                            onTouchStart={() => fileRef.current?.click()}
                             onClick={() => fileRef.current?.click()}
                             className="w-full bg-white border-2 border-dashed border-bg2 rounded-btn py-4
                                        flex flex-col items-center gap-1 active:border-act transition-colors"
@@ -412,7 +406,6 @@ function BrowseCardsView() {
                             {BROWSE_EMOJIS.map(e => (
                               <button
                                 key={e}
-                                onTouchStart={() => setEditEmoji(e)}
                                 onClick={() => setEditEmoji(e)}
                                 className={`text-xl p-1.5 rounded-lg border-2 transition-colors
                                   ${editEmoji === e ? 'border-act bg-white' : 'border-transparent bg-white/50'}`}
@@ -437,7 +430,6 @@ function BrowseCardsView() {
                       {/* Actions */}
                       <div className="flex gap-2 pt-1">
                         <button
-                          onTouchStart={() => handleSave(card)}
                           onClick={() => handleSave(card)}
                           disabled={!editLabel.trim() || saving}
                           className="flex-1 py-3 rounded-btn bg-act text-white font-display text-base shadow-btn
@@ -446,7 +438,6 @@ function BrowseCardsView() {
                           {saving ? 'Uploading…' : 'Save'}
                         </button>
                         <button
-                          onTouchStart={closeEdit}
                           onClick={closeEdit}
                           className="px-4 py-3 rounded-btn bg-white text-txt-m font-body font-bold text-sm"
                         >
@@ -454,7 +445,6 @@ function BrowseCardsView() {
                         </button>
                         {card.is_custom && (
                           <button
-                            onTouchStart={() => handleDelete(card.id)}
                             onClick={() => handleDelete(card.id)}
                             className="px-4 py-3 rounded-btn bg-feel text-white font-body font-bold text-sm
                                        active:scale-[0.97] transition-transform duration-150"
@@ -495,7 +485,6 @@ function PresetEditorView({ preset, currentCardIds, onUpdate }) {
           return (
             <button
               key={card.id}
-              onTouchStart={() => toggle(card.id)}
               onClick={() => toggle(card.id)}
               className={`rounded-btn p-3 flex flex-col items-center gap-1 border-2 transition-colors
                 ${on ? 'bg-act-l border-act' : 'bg-card border-transparent'}`}
@@ -530,7 +519,7 @@ function SectionLabel({ children }) {
 function SettingsRow({ icon, label, onPress }) {
   return (
     <button
-      onTouchStart={onPress} onClick={onPress}
+      onClick={onPress}
       className="bg-card rounded-btn p-4 flex items-center gap-3 w-full text-left active:bg-bg2 transition-colors"
     >
       <span className="text-xl">{icon}</span>
@@ -555,7 +544,7 @@ function SliderRow({ label, value, min, max, step, onChange, format }) {
 function Toggle({ on, onToggle }) {
   return (
     <button
-      onTouchStart={onToggle} onClick={onToggle}
+      onClick={onToggle}
       className={`w-12 h-6 rounded-full transition-colors relative ${on ? 'bg-food' : 'bg-bg2'}`}
     >
       <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all duration-200 ${on ? 'left-[26px]' : 'left-0.5'}`} />
