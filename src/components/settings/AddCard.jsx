@@ -92,7 +92,7 @@ export default function AddCard({ onClose }) {
 
       <button
         onTouchStart={handleSave}
-        onClick={(e) => { e.preventDefault() }}
+        onClick={handleSave}
         disabled={!label.trim() || saving}
         className="w-full py-4 rounded-btn bg-act text-white font-display text-lg shadow-btn
                    disabled:opacity-50 active:scale-[0.97] transition-transform duration-150"
