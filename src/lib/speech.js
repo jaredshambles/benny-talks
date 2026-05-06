@@ -26,8 +26,12 @@ export function speak(text, { rate = 0.80, pitch = 1.10 } = {}) {
   if (selectedVoice) utt.voice = selectedVoice
   utt.rate = rate
   utt.pitch = pitch
-  // iOS Safari gets stuck in a paused state after the first cancel(); resume() unsticks it
-  window.speechSynthesis.resume()
-  window.speechSynthesis.speak(utt)
+  // iOS Safari: cancel() is asynchronous — speaking immediately after cancels the new
+  // utterance too. A short delay lets the cancel settle, then resume() unsticks the
+  // engine from its paused state before we enqueue the new utterance.
+  setTimeout(() => {
+    window.speechSynthesis.resume()
+    window.speechSynthesis.speak(utt)
+  }, 50)
   return utt
 }
