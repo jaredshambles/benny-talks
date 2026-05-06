@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useStore } from '../../store/useStore'
 
 const CATEGORY_STYLES = {
@@ -14,24 +14,21 @@ export default function PecsCard({ card }) {
   const { tapCard, speaking } = useStore()
   const [pressing, setPressing] = useState(false)
   const [blooming, setBlooming] = useState(false)
-  const touchFired = useRef(false)
 
   const styles = CATEGORY_STYLES[card.category] ?? CATEGORY_STYLES.custom
   const isActive = speaking?.label === card.label
 
-  function handleTouchStart(e) {
-    e.preventDefault()
-    touchFired.current = true
+  // Visual feedback fires immediately on touch so the card feels instant
+  function handleTouchStart() {
     setPressing(true)
     setBlooming(true)
-    tapCard(card)
     setTimeout(() => setPressing(false), 150)
     setTimeout(() => setBlooming(false), 400)
   }
 
+  // Audio fires on click — iOS treats this as a trusted user gesture for speech synthesis.
+  // A single tap on iOS produces one click event, so there is no double-fire concern here.
   function handleClick() {
-    // Touch already fired tapCard — skip the duplicate click event
-    if (touchFired.current) { touchFired.current = false; return }
     tapCard(card)
   }
 
@@ -42,7 +39,7 @@ export default function PecsCard({ card }) {
       className={`
         relative overflow-hidden rounded-card bg-card shadow-card border-none
         flex flex-col items-center justify-center gap-2 p-3
-        transition-transform duration-150 w-full h-full
+        transition-transform duration-150 w-full h-full touch-manipulation
         ${pressing ? 'scale-[0.93]' : 'scale-100'}
         ${isActive ? 'ring-2 ring-offset-1 ring-txt-m' : ''}
         min-h-[80px]
