@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useStore } from '../../store/useStore'
 import { supabase } from '../../lib/supabase'
@@ -237,12 +237,25 @@ function MainView({ settings, updateSettings, presets, stats, webhookUrl, setWeb
 
 const BROWSE_EMOJIS = ['⭐','🌟','❤️','🎈','🎁','🏆','🌈','🦁','🐯','🐻','🦊','🐸','🍎','🍦','🍰','🎮','📱','🎸','⚽','🚀','🔥','🌺','🌊','🍕','🎀','🚂','✈️','🏠','🐕','🐱']
 
+async function uploadCardImage(file) {
+  const ext = file.name.split('.').pop()
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const { error } = await supabase.storage.from('card-images').upload(path, file, {
+    cacheControl: '31536000', upsert: false,
+  })
+  if (error) throw error
+  return supabase.storage.from('card-images').getPublicUrl(path).data.publicUrl
+}
+
 function BrowseCardsView() {
   const { cards, updateCard, deleteCard } = useStore()
-  const [expandedId, setExpandedId] = useState(null)
-  const [editLabel, setEditLabel]   = useState('')
-  const [editEmoji, setEditEmoji]   = useState('')
-  const [saving, setSaving]         = useState(false)
+  const [expandedId, setExpandedId]       = useState(null)
+  const [editLabel, setEditLabel]         = useState('')
+  const [editEmoji, setEditEmoji]         = useState('')
+  const [editImgPreview, setEditImgPreview] = useState(null) // object URL or existing img_url
+  const [editImgFile, setEditImgFile]     = useState(null)   // File to upload on save
+  const [saving, setSaving]               = useState(false)
+  const fileRef                           = useRef(null)
 
   const categories = ['food', 'activities', 'feelings', 'people', 'custom']
 
@@ -250,19 +263,45 @@ function BrowseCardsView() {
     setExpandedId(card.id)
     setEditLabel(card.label)
     setEditEmoji(card.emoji ?? '⭐')
+    setEditImgPreview(card.img_url ?? null)
+    setEditImgFile(null)
     setSaving(false)
   }
 
   function closeEdit() {
     setExpandedId(null)
+    setEditImgFile(null)
+    setEditImgPreview(null)
+  }
+
+  function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setEditImgFile(file)
+    setEditImgPreview(URL.createObjectURL(file))
+    e.target.value = '' // allow re-selecting same file
   }
 
   async function handleSave(card) {
     if (!editLabel.trim() || saving) return
     setSaving(true)
-    await updateCard(card.id, { label: editLabel.trim(), emoji: editEmoji })
+
+    let img_url = editImgPreview
+    if (editImgFile) {
+      try {
+        img_url = await uploadCardImage(editImgFile)
+      } catch (err) {
+        alert(`Photo upload failed: ${err.message}`)
+        setSaving(false)
+        return
+      }
+    }
+    if (!editImgPreview && !editImgFile) img_url = null
+
+    await updateCard(card.id, { label: editLabel.trim(), emoji: editEmoji, img_url })
     setSaving(false)
     setExpandedId(null)
+    setEditImgFile(null)
   }
 
   async function handleDelete(id) {
@@ -272,6 +311,15 @@ function BrowseCardsView() {
 
   return (
     <div className="p-4 flex flex-col gap-4">
+      {/* Hidden file input — triggers iOS photo library / camera picker */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {categories.map(cat => {
         const catCards = cards.filter(c => c.category === cat)
         if (!catCards.length) return null
@@ -306,23 +354,75 @@ function BrowseCardsView() {
                   {/* Inline edit panel */}
                   {expandedId === card.id && (
                     <div className="bg-act-l border-t border-act/20 rounded-b-btn px-4 pt-3 pb-4 flex flex-col gap-3">
-                      {/* Emoji picker */}
+
+                      {/* Photo / emoji row */}
                       <div>
-                        <p className="font-body font-bold text-xs text-txt-m uppercase tracking-wide mb-2">Emoji</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {BROWSE_EMOJIS.map(e => (
+                        <p className="font-body font-bold text-xs text-txt-m uppercase tracking-wide mb-2">Photo</p>
+                        {editImgPreview ? (
+                          <div className="flex items-center gap-3">
                             <button
-                              key={e}
-                              onTouchStart={() => setEditEmoji(e)}
-                              onClick={() => setEditEmoji(e)}
-                              className={`text-xl p-1.5 rounded-lg border-2 transition-colors
-                                ${editEmoji === e ? 'border-act bg-white' : 'border-transparent bg-white/50'}`}
+                              onTouchStart={() => fileRef.current?.click()}
+                              onClick={() => fileRef.current?.click()}
+                              className="relative flex-shrink-0"
                             >
-                              {e}
+                              <img
+                                src={editImgPreview}
+                                alt=""
+                                className="w-16 h-16 object-cover rounded-xl border-2 border-act"
+                              />
+                              <span className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-xl text-white text-xs font-body font-bold opacity-0 active:opacity-100">
+                                Replace
+                              </span>
                             </button>
-                          ))}
-                        </div>
+                            <div className="flex flex-col gap-1.5">
+                              <button
+                                onTouchStart={() => fileRef.current?.click()}
+                                onClick={() => fileRef.current?.click()}
+                                className="text-sm font-body font-bold text-act"
+                              >
+                                📷 Replace photo
+                              </button>
+                              <button
+                                onTouchStart={() => { setEditImgPreview(null); setEditImgFile(null) }}
+                                onClick={() => { setEditImgPreview(null); setEditImgFile(null) }}
+                                className="text-sm font-body text-txt-l"
+                              >
+                                ✕ Remove photo
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onTouchStart={() => fileRef.current?.click()}
+                            onClick={() => fileRef.current?.click()}
+                            className="w-full bg-white border-2 border-dashed border-bg2 rounded-btn py-4
+                                       flex flex-col items-center gap-1 active:border-act transition-colors"
+                          >
+                            <span className="text-3xl">📷</span>
+                            <span className="font-body font-bold text-sm text-txt-m">Add photo from library</span>
+                          </button>
+                        )}
                       </div>
+
+                      {/* Emoji picker — hidden when a photo is set */}
+                      {!editImgPreview && (
+                        <div>
+                          <p className="font-body font-bold text-xs text-txt-m uppercase tracking-wide mb-2">Or pick an emoji</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {BROWSE_EMOJIS.map(e => (
+                              <button
+                                key={e}
+                                onTouchStart={() => setEditEmoji(e)}
+                                onClick={() => setEditEmoji(e)}
+                                className={`text-xl p-1.5 rounded-lg border-2 transition-colors
+                                  ${editEmoji === e ? 'border-act bg-white' : 'border-transparent bg-white/50'}`}
+                              >
+                                {e}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Label */}
                       <div>
@@ -331,7 +431,6 @@ function BrowseCardsView() {
                           value={editLabel}
                           onChange={e => setEditLabel(e.target.value)}
                           className="w-full bg-white border border-bg2 rounded-btn px-3 py-2.5 font-body text-txt text-base outline-none focus:border-act"
-                          autoFocus
                         />
                       </div>
 
@@ -344,7 +443,7 @@ function BrowseCardsView() {
                           className="flex-1 py-3 rounded-btn bg-act text-white font-display text-base shadow-btn
                                      disabled:opacity-50 active:scale-[0.97] transition-transform duration-150"
                         >
-                          {saving ? 'Saving…' : 'Save'}
+                          {saving ? 'Uploading…' : 'Save'}
                         </button>
                         <button
                           onTouchStart={closeEdit}
