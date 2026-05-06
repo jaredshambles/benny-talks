@@ -228,9 +228,41 @@ function MainView({ settings, updateSettings, presets, stats, webhookUrl, setWeb
   )
 }
 
+const BROWSE_EMOJIS = ['⭐','🌟','❤️','🎈','🎁','🏆','🌈','🦁','🐯','🐻','🦊','🐸','🍎','🍦','🍰','🎮','📱','🎸','⚽','🚀','🔥','🌺','🌊','🍕','🎀','🚂','✈️','🏠','🐕','🐱']
+
 function BrowseCardsView() {
-  const { cards } = useStore()
+  const { cards, updateCard, deleteCard } = useStore()
+  const [expandedId, setExpandedId] = useState(null)
+  const [editLabel, setEditLabel]   = useState('')
+  const [editEmoji, setEditEmoji]   = useState('')
+  const [saving, setSaving]         = useState(false)
+
   const categories = ['food', 'activities', 'feelings', 'people', 'custom']
+
+  function openEdit(card) {
+    setExpandedId(card.id)
+    setEditLabel(card.label)
+    setEditEmoji(card.emoji ?? '⭐')
+    setSaving(false)
+  }
+
+  function closeEdit() {
+    setExpandedId(null)
+  }
+
+  async function handleSave(card) {
+    if (!editLabel.trim() || saving) return
+    setSaving(true)
+    await updateCard(card.id, { label: editLabel.trim(), emoji: editEmoji })
+    setSaving(false)
+    setExpandedId(null)
+  }
+
+  async function handleDelete(id) {
+    await deleteCard(id)
+    setExpandedId(null)
+  }
+
   return (
     <div className="p-4 flex flex-col gap-4">
       {categories.map(cat => {
@@ -238,16 +270,94 @@ function BrowseCardsView() {
         if (!catCards.length) return null
         return (
           <div key={cat}>
-            <p className="font-body font-bold text-xs text-txt-l uppercase tracking-wider px-1 pb-2">
+            <p className="font-body font-bold text-xs text-txt-l uppercase tracking-wider px-1 pb-2 capitalize">
               {cat}
             </p>
             <div className="flex flex-col gap-1">
               {catCards.map(card => (
-                <div key={card.id} className="bg-card rounded-btn px-4 py-3 flex items-center gap-3">
-                  <span className="text-2xl">{card.emoji}</span>
-                  <span className="font-body font-bold text-sm text-txt flex-1">{card.label}</span>
-                  {card.is_custom && (
-                    <span className="font-body text-xs text-txt-l bg-bg2 rounded-pill px-2 py-0.5">custom</span>
+                <div key={card.id}>
+                  {/* Card row — always visible */}
+                  <button
+                    onTouchStart={() => expandedId === card.id ? closeEdit() : openEdit(card)}
+                    onClick={() => expandedId === card.id ? closeEdit() : openEdit(card)}
+                    className={`w-full bg-card rounded-btn px-4 py-3 flex items-center gap-3 text-left transition-colors
+                      ${expandedId === card.id ? 'bg-act-l rounded-b-none' : 'active:bg-bg2'}`}
+                  >
+                    {card.img_url
+                      ? <img src={card.img_url} alt={card.label} className="w-8 h-8 object-cover rounded-lg flex-shrink-0" />
+                      : <span className="text-2xl flex-shrink-0">{card.emoji}</span>
+                    }
+                    <span className="font-body font-bold text-sm text-txt flex-1">{card.label}</span>
+                    {card.is_custom && (
+                      <span className="font-body text-xs text-txt-l bg-bg2 rounded-pill px-2 py-0.5 flex-shrink-0">custom</span>
+                    )}
+                    <span className="text-txt-l text-sm flex-shrink-0">
+                      {expandedId === card.id ? '∧' : '›'}
+                    </span>
+                  </button>
+
+                  {/* Inline edit panel */}
+                  {expandedId === card.id && (
+                    <div className="bg-act-l border-t border-act/20 rounded-b-btn px-4 pt-3 pb-4 flex flex-col gap-3">
+                      {/* Emoji picker */}
+                      <div>
+                        <p className="font-body font-bold text-xs text-txt-m uppercase tracking-wide mb-2">Emoji</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {BROWSE_EMOJIS.map(e => (
+                            <button
+                              key={e}
+                              onTouchStart={() => setEditEmoji(e)}
+                              onClick={() => setEditEmoji(e)}
+                              className={`text-xl p-1.5 rounded-lg border-2 transition-colors
+                                ${editEmoji === e ? 'border-act bg-white' : 'border-transparent bg-white/50'}`}
+                            >
+                              {e}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Label */}
+                      <div>
+                        <p className="font-body font-bold text-xs text-txt-m uppercase tracking-wide mb-2">Label</p>
+                        <input
+                          value={editLabel}
+                          onChange={e => setEditLabel(e.target.value)}
+                          className="w-full bg-white border border-bg2 rounded-btn px-3 py-2.5 font-body text-txt text-base outline-none focus:border-act"
+                          autoFocus
+                        />
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          onTouchStart={() => handleSave(card)}
+                          onClick={() => handleSave(card)}
+                          disabled={!editLabel.trim() || saving}
+                          className="flex-1 py-3 rounded-btn bg-act text-white font-display text-base shadow-btn
+                                     disabled:opacity-50 active:scale-[0.97] transition-transform duration-150"
+                        >
+                          {saving ? 'Saving…' : 'Save'}
+                        </button>
+                        <button
+                          onTouchStart={closeEdit}
+                          onClick={closeEdit}
+                          className="px-4 py-3 rounded-btn bg-white text-txt-m font-body font-bold text-sm"
+                        >
+                          Cancel
+                        </button>
+                        {card.is_custom && (
+                          <button
+                            onTouchStart={() => handleDelete(card.id)}
+                            onClick={() => handleDelete(card.id)}
+                            className="px-4 py-3 rounded-btn bg-feel text-white font-body font-bold text-sm
+                                       active:scale-[0.97] transition-transform duration-150"
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}

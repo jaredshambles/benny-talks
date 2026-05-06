@@ -120,6 +120,18 @@ export const useStore = create(
         set(s => ({ cards: s.cards.map(c => c.id === tempId ? data : c) }))
       },
 
+      updateCard: async (id, patch) => {
+        // Optimistically update in memory
+        set(s => ({ cards: s.cards.map(c => c.id === id ? { ...c, ...patch } : c) }))
+        await supabase.from('cards').update(patch).eq('id', id)
+      },
+
+      deleteCard: async (id) => {
+        // Optimistically remove
+        set(s => ({ cards: s.cards.filter(c => c.id !== id) }))
+        await supabase.from('cards').delete().eq('id', id)
+      },
+
       // ── TIMER ──
 
       startTimer: (secs, label = null) => {
