@@ -1,12 +1,13 @@
 import { useStore } from '../../store/useStore'
 
 const TABS = [
-  { id: 'home',       label: 'Home',       emoji: '🏠' },
-  { id: 'food',       label: 'Food',       emoji: '🍗' },
-  { id: 'activities', label: 'Play',       emoji: '🎯' },
-  { id: 'feelings',   label: 'Feelings',   emoji: '💛' },
-  { id: 'people',     label: 'People',     emoji: '👥' },
-  { id: 'routines',   label: 'Routines',   emoji: '📋' },
+  { id: 'home',       label: 'Home',     emoji: '🏠' },
+  { id: 'food',       label: 'Food',     emoji: '🍗' },
+  { id: 'activities', label: 'Play',     emoji: '🎯' },
+  { id: 'feelings',   label: 'Feelings', emoji: '💛' },
+  { id: 'people',     label: 'People',   emoji: '👥' },
+  { id: 'routines',   label: 'Routines', emoji: '📋' },
+  { id: 'games',      label: 'Games',    emoji: '🎮' },
 ]
 
 const CATEGORY_ACTIVE = {
@@ -16,6 +17,7 @@ const CATEGORY_ACTIVE = {
   feelings:   'text-feel border-feel',
   people:     'text-ppl border-ppl',
   routines:   'text-rtn border-rtn',
+  games:      'text-ppl border-ppl',
 }
 
 export default function BottomNav() {
@@ -36,8 +38,8 @@ export default function BottomNav() {
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 border-t-2 transition-colors
               ${isActive ? CATEGORY_ACTIVE[tab.id] : 'text-txt-l border-transparent'}`}
           >
-            <span className="text-xl leading-none">{tab.emoji}</span>
-            <span className={`text-[10px] font-body font-bold leading-none ${isActive ? '' : 'text-txt-m'}`}>
+            <span className="text-lg leading-none">{tab.emoji}</span>
+            <span className={`text-[9px] font-body font-bold leading-none ${isActive ? '' : 'text-txt-m'}`}>
               {tab.label}
             </span>
           </button>

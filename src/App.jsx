@@ -7,6 +7,7 @@ import BottomNav from './components/layout/BottomNav'
 import HomeView from './views/HomeView'
 import CategoryView from './views/CategoryView'
 import RoutinesView from './views/RoutinesView'
+import GamesView from './views/GamesView'
 import SpeakingBar from './components/overlay/SpeakingBar'
 import RoutineFlow from './components/routines/RoutineFlow'
 import PresetSwitcher from './components/presets/PresetSwitcher'
@@ -33,6 +34,7 @@ export default function App() {
         {activeTab === 'feelings'   && <CategoryView category="feelings" />}
         {activeTab === 'people'     && <CategoryView category="people" />}
         {activeTab === 'routines'   && <RoutinesView />}
+        {activeTab === 'games'      && <GamesView />}
       </main>
 
       <SpeakingBar />
