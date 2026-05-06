@@ -51,7 +51,7 @@ export default function PecsCard({ card }) {
         ? <img
             src={card.img_url}
             alt={card.label}
-            className="relative w-[60px] h-[60px] object-cover rounded-xl select-none"
+            className="relative w-full aspect-square object-cover rounded-xl select-none"
             draggable={false}
           />
         : <span className="relative text-[52px] leading-none select-none">{card.emoji}</span>
