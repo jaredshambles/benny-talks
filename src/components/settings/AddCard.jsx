@@ -11,23 +11,30 @@ const CATEGORIES = [
 const QUICK_EMOJIS = ['⭐','🌟','❤️','🎈','🎁','🏆','🌈','🦁','🐯','🐻','🦊','🐸','🍎','🍦','🍰','🎮','📱','🎸','⚽','🚀']
 
 export default function AddCard({ onClose }) {
-  const { addCard } = useStore()
+  const { addCard, addCardError } = useStore()
   const [label, setLabel] = useState('')
   const [emoji, setEmoji] = useState('⭐')
   const [category, setCategory] = useState('activities')
   const [saving, setSaving] = useState(false)
 
-  async function handleSave() {
-    if (!label.trim()) return
+  async function handleSave(e) {
+    e?.preventDefault()
+    if (!label.trim() || saving) return
     setSaving(true)
     await addCard({ label: label.trim(), emoji, category })
     setSaving(false)
+    // Close immediately — card is already visible locally even if sync failed
     onClose()
   }
 
   return (
     <div className="flex flex-col gap-4 p-5">
       <h3 className="font-display text-xl text-txt">Add a Card</h3>
+      {addCardError && (
+        <div className="bg-red-50 border border-red-200 rounded-btn px-3 py-2 font-body text-sm text-red-700">
+          {addCardError}
+        </div>
+      )}
 
       {/* Emoji picker */}
       <div>
@@ -85,7 +92,7 @@ export default function AddCard({ onClose }) {
 
       <button
         onTouchStart={handleSave}
-        onClick={handleSave}
+        onClick={(e) => { e.preventDefault() }}
         disabled={!label.trim() || saving}
         className="w-full py-4 rounded-btn bg-act text-white font-display text-lg shadow-btn
                    disabled:opacity-50 active:scale-[0.97] transition-transform duration-150"
