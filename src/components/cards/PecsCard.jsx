@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useStore } from '../../store/useStore'
 
 const CATEGORY_STYLES = {
@@ -14,12 +14,14 @@ export default function PecsCard({ card }) {
   const { tapCard, speaking } = useStore()
   const [pressing, setPressing] = useState(false)
   const [blooming, setBlooming] = useState(false)
+  const touchFired = useRef(false)
 
   const styles = CATEGORY_STYLES[card.category] ?? CATEGORY_STYLES.custom
   const isActive = speaking?.label === card.label
 
   function handleTouchStart(e) {
     e.preventDefault()
+    touchFired.current = true
     setPressing(true)
     setBlooming(true)
     tapCard(card)
@@ -27,10 +29,16 @@ export default function PecsCard({ card }) {
     setTimeout(() => setBlooming(false), 400)
   }
 
+  function handleClick() {
+    // Touch already fired tapCard — skip the duplicate click event
+    if (touchFired.current) { touchFired.current = false; return }
+    tapCard(card)
+  }
+
   return (
     <button
       onTouchStart={handleTouchStart}
-      onClick={() => tapCard(card)}
+      onClick={handleClick}
       className={`
         relative overflow-hidden rounded-card bg-card shadow-card border-none
         flex flex-col items-center justify-center gap-2 p-3
