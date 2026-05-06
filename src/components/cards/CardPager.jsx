@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import CardGrid from './CardGrid'
 
-const CARDS_PER_PAGE = 8
+const CARDS_PER_PAGE = 6
 
 export default function CardPager({ cards }) {
   const [page, setPage] = useState(0)
