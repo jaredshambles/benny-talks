@@ -57,18 +57,13 @@ export default function SafetyGame({ mode, deckId, onDone }) {
   function handleAnswer(answer) {
     if (phase !== 'question' || !card) return
 
-    // Speak the card label immediately
-    speak(card.label, { rate: settings.voiceRate, pitch: settings.voicePitch })
-
     const isCorrect = answer === (card.is_safe ? 'safe' : 'unsafe')
     setCorrect(isCorrect)
     setPhase('feedback')
 
-    // Speak the reinforcement phrase after a short pause (fire-and-forget)
+    // Speak the reinforcement phrase
     const reinforcement = `${card.label} is ${card.is_safe ? 'safe' : 'not safe'}`
-    setTimeout(() => {
-      speak(reinforcement, { rate: settings.voiceRate, pitch: settings.voicePitch })
-    }, 400)
+    speak(reinforcement, { rate: settings.voiceRate, pitch: settings.voicePitch })
 
     // Auto-advance — store in ref so we can cancel on unmount
     const delay = isCorrect ? 1800 : 2200
