@@ -1,35 +1,18 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import CardGrid from './CardGrid'
 
-const CARDS_PER_PAGE = 6
+const CARDS_PER_PAGE = 8
 
 export default function CardPager({ cards }) {
   const [page, setPage] = useState(0)
-  const touchStartX = useRef(null)
-  const touchStartY = useRef(null)
 
   const pages = []
   for (let i = 0; i < cards.length; i += CARDS_PER_PAGE) {
     pages.push(cards.slice(i, i + CARDS_PER_PAGE))
   }
   const totalPages = pages.length
-
-  function handleTouchStart(e) {
-    touchStartX.current = e.touches[0].clientX
-    touchStartY.current = e.touches[0].clientY
-  }
-
-  function handleTouchEnd(e) {
-    if (touchStartX.current === null) return
-    const dx = e.changedTouches[0].clientX - touchStartX.current
-    const dy = e.changedTouches[0].clientY - touchStartY.current
-    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-      if (dx < 0 && page < totalPages - 1) setPage(p => p + 1)
-      if (dx > 0 && page > 0) setPage(p => p - 1)
-    }
-    touchStartX.current = null
-    touchStartY.current = null
-  }
+  const hasPrev = page > 0
+  const hasNext = page < totalPages - 1
 
   if (!cards.length) {
     return (
@@ -40,12 +23,20 @@ export default function CardPager({ cards }) {
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden px-3">
-      <div
-        className="flex-1 overflow-hidden"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+    <div className="flex flex-row flex-1 overflow-hidden px-1 gap-1">
+      {/* Left arrow */}
+      <button
+        onTouchStart={(e) => { e.preventDefault(); if (hasPrev) setPage(p => p - 1) }}
+        onClick={() => { if (hasPrev) setPage(p => p - 1) }}
+        className={`flex-shrink-0 w-9 flex items-center justify-center rounded-xl transition-opacity duration-150 select-none
+          ${hasPrev ? 'opacity-100 text-txt-m' : 'opacity-0 pointer-events-none'}`}
+        aria-label="Previous page"
       >
+        <span className="text-3xl font-light leading-none">‹</span>
+      </button>
+
+      {/* Card grid */}
+      <div className="flex-1 overflow-hidden relative">
         <div
           className="flex h-full transition-transform duration-[280ms] ease-[cubic-bezier(.4,0,.2,1)]"
           style={{ transform: `translateX(${-page * 100}%)`, width: `${totalPages * 100}%` }}
@@ -58,18 +49,16 @@ export default function CardPager({ cards }) {
         </div>
       </div>
 
-      {/* Dot indicators */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-1.5 py-2 flex-shrink-0">
-          {pages.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-200 bg-txt-l
-                ${i === page ? 'w-4 bg-txt-m' : 'w-1.5'}`}
-            />
-          ))}
-        </div>
-      )}
+      {/* Right arrow */}
+      <button
+        onTouchStart={(e) => { e.preventDefault(); if (hasNext) setPage(p => p + 1) }}
+        onClick={() => { if (hasNext) setPage(p => p + 1) }}
+        className={`flex-shrink-0 w-9 flex items-center justify-center rounded-xl transition-opacity duration-150 select-none
+          ${hasNext ? 'opacity-100 text-txt-m' : 'opacity-0 pointer-events-none'}`}
+        aria-label="Next page"
+      >
+        <span className="text-3xl font-light leading-none">›</span>
+      </button>
     </div>
   )
 }

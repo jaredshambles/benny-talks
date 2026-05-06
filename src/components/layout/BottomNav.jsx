@@ -6,7 +6,6 @@ const TABS = [
   { id: 'activities', label: 'Play',     emoji: '🎯' },
   { id: 'feelings',   label: 'Feelings', emoji: '💛' },
   { id: 'people',     label: 'People',   emoji: '👥' },
-  { id: 'routines',   label: 'Routines', emoji: '📋' },
   { id: 'games',      label: 'Games',    emoji: '🎮' },
 ]
 

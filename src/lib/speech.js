@@ -26,6 +26,8 @@ export function speak(text, { rate = 0.80, pitch = 1.10 } = {}) {
   if (selectedVoice) utt.voice = selectedVoice
   utt.rate = rate
   utt.pitch = pitch
+  // iOS Safari gets stuck in a paused state after the first cancel(); resume() unsticks it
+  window.speechSynthesis.resume()
   window.speechSynthesis.speak(utt)
   return utt
 }
