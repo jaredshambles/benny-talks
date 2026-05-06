@@ -47,7 +47,15 @@ export default function PecsCard({ card }) {
       <div className={`absolute inset-0 rounded-card transition-opacity duration-300 ${styles.bloom} ${blooming ? 'opacity-100' : 'opacity-0'}`} />
 
       {/* Content */}
-      <span className="relative text-[52px] leading-none select-none">{card.emoji}</span>
+      {card.img_url
+        ? <img
+            src={card.img_url}
+            alt={card.label}
+            className="relative w-[60px] h-[60px] object-cover rounded-xl select-none"
+            draggable={false}
+          />
+        : <span className="relative text-[52px] leading-none select-none">{card.emoji}</span>
+      }
       <span className="relative font-display text-sm text-center text-txt leading-tight px-1 line-clamp-2 select-none">
         {card.label}
       </span>

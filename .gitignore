@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .vercel
+
+.superpowers/
+.claude/settings.local.json
