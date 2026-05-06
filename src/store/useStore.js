@@ -48,6 +48,7 @@ export const useStore = create(
         voicePitch: 1.10,
         transitionChimeEnabled: true,
         webhookUrl: '',
+        labelDisplayMs: 2000,
       },
 
       // ── ACTIONS ──
@@ -59,7 +60,7 @@ export const useStore = create(
         speak(card.label, { rate: settings.voiceRate, pitch: settings.voicePitch })
         set({ speaking: { label: card.label, emoji: card.emoji } })
         if (speakingTimer) clearTimeout(speakingTimer)
-        speakingTimer = setTimeout(() => set({ speaking: null }), 2800)
+        speakingTimer = setTimeout(() => set({ speaking: null }), settings.labelDisplayMs ?? 2000)
 
         // Fire-and-forget tap log
         supabase.from('tap_log').insert({

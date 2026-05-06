@@ -167,6 +167,13 @@ function MainView({ settings, updateSettings, presets, stats, webhookUrl, setWeb
           onChange={v => updateSettings({ voiceRate: v })} />
         <SliderRow label="Pitch" value={settings.voicePitch} min={0.8} max={1.5} step={0.05}
           onChange={v => updateSettings({ voicePitch: v })} />
+        <SliderRow
+          label="Label"
+          value={settings.labelDisplayMs ?? 2000}
+          min={500} max={5000} step={500}
+          onChange={v => updateSettings({ labelDisplayMs: v })}
+          format={v => `${(v / 1000).toFixed(1)}s`}
+        />
       </div>
 
       {/* SOUND */}
@@ -434,13 +441,14 @@ function SettingsRow({ icon, label, onPress }) {
   )
 }
 
-function SliderRow({ label, value, min, max, step, onChange }) {
+function SliderRow({ label, value, min, max, step, onChange, format }) {
+  const display = format ? format(value) : value.toFixed(2)
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="font-body font-bold text-sm text-txt w-12">{label}</span>
       <input type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(parseFloat(e.target.value))} className="flex-1" />
-      <span className="font-body text-xs text-txt-m w-8 text-right">{value.toFixed(2)}</span>
+      <span className="font-body text-xs text-txt-m w-8 text-right">{display}</span>
     </div>
   )
 }
